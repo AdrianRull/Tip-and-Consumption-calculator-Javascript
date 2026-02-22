@@ -113,8 +113,9 @@ function mostrarPlatillos(platillos) {
         // AQUÍ relleno el cliente para que empiece a ser algo el pedido que estoy creando
 
         inputCantidad.oninput = function () { // inputCantidad lo cree arriba y abajo lo pego en el div general que creé const agregar = document.createElement('DIV');
-            const cantidad = parseInt(inputCantidad.value); // parseInt para que sean numero
-            // console.log(cantidad);
+            const cantidad = Number(inputCantidad.value) || 0; // parseInt para que sean numero
+            // console.log(cantidad); Number para ser mas preciso, Si Number(...) da NaN, '', etc., entonces usa 0.
+            // Así evitas que tu app mande valores inválidos y se rompan sumas.
             agregarPlatillo({
                 ...platillo,
                 cantidad
@@ -201,7 +202,7 @@ function actualizarResumen() {
 
     // Información de la mesa
     const mesa = document.createElement('P');
-    mesa.classList.add('fw-bold');
+    mesa.classList.add('fw-bold', 'text-center');
     mesa.textContent = 'Mesa: ';
 
     const mesaSpan = document.createElement('SPAN');
@@ -210,7 +211,7 @@ function actualizarResumen() {
 
     // Información de la hora
     const hora = document.createElement('P');
-    hora.classList.add('fw-bold');
+    hora.classList.add('fw-bold', 'text-center');
     hora.textContent = 'Hora: ';
 
     const horaSpan = document.createElement('SPAN');
@@ -221,10 +222,17 @@ function actualizarResumen() {
     mesa.appendChild(mesaSpan);
     hora.appendChild(horaSpan);
 
+    const infoMesaHora = document.createElement('DIV');
+    infoMesaHora.classList.add('info-mesa-hora','d-flex','justify-content-center','align-items-center','gap-4');
+    mesa.classList.add('fw-bold', 'mb-0', 'text-success-emphasis');
+    hora.classList.add('fw-bold', 'mb-0', 'text-success-emphasis');
+
+    infoMesaHora.appendChild(mesa);
+    infoMesaHora.appendChild(hora);
     // Título de la sección
     const heading = document.createElement('H3');
     heading.textContent = 'Platillos Consumidos';
-    heading.classList.add('my-4', 'text-center');
+    heading.classList.add('mt-2', 'mb-3', 'text-center');
 
     // Iterar sobre el array de pedidos
     const grupo = document.createElement('UL');
@@ -307,10 +315,17 @@ function actualizarResumen() {
     })
 
     // Agregar al contenido
-    resumen.appendChild(mesa);
-    resumen.appendChild(hora);
+    resumen.appendChild(infoMesaHora);
     resumen.appendChild(heading);
     resumen.appendChild(grupo);
+
+    const totalConsumo = calcularTotalConsumo();
+
+    const totalConsumoParrafo = document.createElement('P');
+    totalConsumoParrafo.classList.add('fw-bold', 'fs-5', 'mt-4', 'mb-4', 'text-center', 'w-100');
+    totalConsumoParrafo.textContent = `Total consumo: ${totalConsumo} €`;
+
+    resumen.appendChild(totalConsumoParrafo);
 
     contenido.appendChild(resumen);
 
@@ -327,6 +342,12 @@ function limpiarHTML() {
 
 function calcularSubtotal(precio, cantidad) {
     return `${precio*cantidad} €`
+}
+
+function calcularTotalConsumo() {
+    return cliente.pedido.reduce((total, item) => {
+        return total + (item.cantidad * item.precio);
+    }, 0)
 }
 
 function eliminarProducto(id) {
@@ -366,7 +387,7 @@ function formularioPropinas() { // line 315
     formulario.classList.add('col-md-6', 'formulario');
 
     const divFormulario = document.createElement('DIV')
-    divFormulario.classList.add('card', 'py-2', 'px-3', 'shadow');
+    divFormulario.classList.add('card', 'py-2', 'px-3', 'shadow', 'pb-4');
 
     const heading = document.createElement('H3');
     heading.classList.add('my-4', 'text-center');
@@ -385,12 +406,12 @@ function formularioPropinas() { // line 315
     radio10Label.classList.add('form-check-label');
 
     const radio10Div = document.createElement('DIV'); // este div va a contener tanto el input como el label
-    radio10Div.classList.add('form-check'); 
+    radio10Div.classList.add('form-check');
 
     radio10Div.appendChild(radio10); // div (radio10Div) → ahora radio10 (input type=radio) cuelga dentro de radio10Div
     radio10Div.appendChild(radio10Label); // div (radio10Div) → ahora radio10Label (label) cuelga dentro de radio10Div
 
-        // Radio Button 25%  
+    // Radio Button 25%  
     const radio25 = document.createElement('INPUT');
     radio25.type = 'radio';
     radio25.name = 'propina';
@@ -402,13 +423,13 @@ function formularioPropinas() { // line 315
     radio25Label.textContent = '25%';
     radio25Label.classList.add('form-check-label');
 
-    const radio25Div = document.createElement('DIV'); 
-    radio25Div.classList.add('form-check'); 
+    const radio25Div = document.createElement('DIV');
+    radio25Div.classList.add('form-check');
 
-    radio25Div.appendChild(radio25);  
+    radio25Div.appendChild(radio25);
     radio25Div.appendChild(radio25Label);
 
-            // Radio Button 50%  
+    // Radio Button 50%  
     const radio50 = document.createElement('INPUT');
     radio50.type = 'radio';
     radio50.name = 'propina';
@@ -420,18 +441,28 @@ function formularioPropinas() { // line 315
     radio50Label.textContent = '50%';
     radio50Label.classList.add('form-check-label');
 
-    const radio50Div = document.createElement('DIV'); 
-    radio50Div.classList.add('form-check'); 
+    const radio50Div = document.createElement('DIV');
+    radio50Div.classList.add('form-check', 'mb-4');
 
-    radio50Div.appendChild(radio50);  
+    const radiosRow = document.createElement('DIV');
+    radiosRow.classList.add('text-center', 'mb-2');
+
+    radio10Div.classList.add('form-check', 'form-check-inline');
+    radio25Div.classList.add('form-check', 'form-check-inline');
+    radio50Div.classList.add('form-check', 'form-check-inline');
+
+    radiosRow.appendChild(radio10Div);
+    radiosRow.appendChild(radio25Div);
+    radiosRow.appendChild(radio50Div);
+
+    radio50Div.appendChild(radio50);
     radio50Div.appendChild(radio50Label);
-    
+
 
     // Agregar al Div Principal
     divFormulario.appendChild(heading); // div (divFormulario) → heading (h1/h2/h3 etc.) cuelga dentro de divFormulario
-    divFormulario.appendChild(radio10Div); // div (divFormulario) → radio10Div (div con radio+label) cuelga dentro de divFormulario
-    divFormulario.appendChild(radio25Div);
-    divFormulario.appendChild(radio50Div);
+    divFormulario.appendChild(radiosRow); // div (divFormulario) → radio10Div (div con radio+label) cuelga dentro de divFormulario
+
 
     // Agregar al Formulario
     formulario.appendChild(divFormulario); // div (formulario) → divFormulario (div que contiene título y radio) cuelga dentro de formulario
@@ -440,8 +471,10 @@ function formularioPropinas() { // line 315
 }
 
 function calcularPropina() {
-    
-    const  {pedido} = cliente; // extraigo el pedido del cliente
+
+    const {
+        pedido
+    } = cliente; // extraigo el pedido del cliente
     let subtotal = 0;
 
     // Calcular el subtotal a pagar
@@ -452,67 +485,75 @@ function calcularPropina() {
 
     // Seleccionar el Radio Button con la propina del cliente
     const propinaSeleccionada = document.querySelector('[name="propina"]:checked').value;
-    
+
     // Calcular la propina regla de tres
-    const propina = ((subtotal * parseInt(propinaSeleccionada)) / 100);// 10%: subtotal * 10 / 100
+    const propina = ((subtotal * parseInt(propinaSeleccionada)) / 100); // 10%: subtotal * 10 / 100
 
     // Calcular el total a pagar
     const total = subtotal + propina;
- 
-    mostrarTotalHTML(subtotal,total,propina);
+
+    mostrarTotalHTML(subtotal, total, propina);
 }
-function mostrarTotalHTML(subtotal,total,propina) {
 
-        const divTotales = document.createElement('DIV');
-        divTotales.classList.add('total-pagar','my-5'); // clase vacia
+function mostrarTotalHTML(subtotal, total, propina) {
 
-        // Subtotal scripting 
-        const subtotalParrafo = document.createElement('P');
-        subtotalParrafo.classList.add('fs-4','fw-bold','mt-2');
-        subtotalParrafo.textContent = 'Subtotal Consumo: ';
+    const divTotales = document.createElement('DIV');
+    divTotales.classList.add('total-pagar', 'my-5'); // clase vacia
 
-        const subtotalSpan = document.createElement('SPAN');
-        subtotalSpan.classList.add('fw-normal');
-        subtotalSpan.textContent = `${subtotal} €`;
+    // Subtotal scripting 
+    const subtotalParrafo = document.createElement('P');
+    subtotalParrafo.classList.add('fs-4', 'fw-bold', 'mt-2');
+    subtotalParrafo.textContent = 'Subtotal Consumo: ';
 
-        subtotalParrafo.appendChild(subtotalSpan); // lo que esta entre parentesis se mete dentro
+    const subtotalSpan = document.createElement('SPAN');
+    subtotalSpan.classList.add('fw-normal');
+    subtotalSpan.textContent = `${subtotal} €`;
 
-        // Propina
-        const propinaParrafo = document.createElement('P');
-        propinaParrafo.classList.add('fs-4','fw-bold','mt-2');
-        propinaParrafo.textContent = 'Propina: ';
+    subtotalParrafo.appendChild(subtotalSpan); // lo que esta entre parentesis se mete dentro
 
-        const propinaSpan = document.createElement('SPAN');
-        propinaSpan.classList.add('fw-normal');
-        propinaSpan.textContent = `${propina} €`;
+    // Propina
+    const propinaParrafo = document.createElement('P');
+    propinaParrafo.classList.add('fs-4', 'fw-bold', 'mt-2');
+    propinaParrafo.textContent = 'Propina: ';
 
-        propinaParrafo.appendChild(propinaSpan); 
+    const propinaSpan = document.createElement('SPAN');
+    propinaSpan.classList.add('fw-normal');
+    propinaSpan.textContent = `${propina} €`;
 
-        // total
-        const totalParrafo = document.createElement('P');
-        totalParrafo.classList.add('fs-4','fw-bold','mt-2');
-        totalParrafo.textContent = 'Total: ';
+    propinaParrafo.appendChild(propinaSpan);
 
-        const totalSpan = document.createElement('SPAN');
-        totalSpan.classList.add('fw-normal');
-        totalSpan.textContent = `${total} €`;
+    // total
+    const totalParrafo = document.createElement('P');
+    totalParrafo.classList.add('fs-4', 'fw-bold', 'mt-2');
+    totalParrafo.textContent = 'Total: ';
 
-        totalParrafo.appendChild(totalSpan); 
+    const totalSpan = document.createElement('SPAN');
+    totalSpan.classList.add('fw-normal');
+    totalSpan.textContent = `${total} €`;
 
-        // Eliminar el ultimo resultado
-        const totalPagarDiv = document.querySelector('.total-pagar');
-        if(totalPagarDiv) { // "si existe.."
-            totalPagarDiv.remove();
-        } 
+    totalParrafo.appendChild(totalSpan);
 
-        divTotales.appendChild(subtotalParrafo);
-        divTotales.appendChild(propinaParrafo);
-        divTotales.appendChild(totalParrafo)
+    // Eliminar el ultimo resultado
+    const totalPagarDiv = document.querySelector('.total-pagar');
+    if (totalPagarDiv) { // "si existe.."
+        totalPagarDiv.remove();
+    }
 
-        const formulario = document.querySelector('.formulario > div'); // donde tengo el selector de formulario que seleccione el primer div
-        formulario.appendChild(divTotales);
+    divTotales.appendChild(subtotalParrafo);
+    divTotales.appendChild(propinaParrafo);
+    divTotales.appendChild(totalParrafo)
 
-}   
+    const firma = document.createElement('P');
+    firma.classList.add('text-center', 'mt-3', 'mb-0', 'small');
+    firma.innerHTML = 'by Adrián Rullán · <a href="https://app.netlify.com/teams/adrianrull/projects" target="_blank" rel="noopener noreferrer">Portfolio</a>';
+
+    divTotales.appendChild(firma);
+
+    const formulario = document.querySelector('.formulario > div'); // donde tengo el selector de formulario que seleccione el primer div
+    formulario.appendChild(divTotales);
+    
+
+}
 
 
 
@@ -528,5 +569,3 @@ function mostrarTotalHTML(subtotal,total,propina) {
 
 // sumar(2, 3); // 2 y 3 = argumentos
 // sumar(10, 5); // misma función, otros argumentos
-
-
